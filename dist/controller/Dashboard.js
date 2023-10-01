@@ -42,7 +42,8 @@ class Dashboard {
                         price: true,
                     },
                 });
-                return res.status(200).json(products);
+                const productsName = products.map((product) => (Object.assign(Object.assign({}, product), { _id: product.productName })));
+                return res.status(200).json(productsName);
             }
             catch (error) {
                 console.log(error);

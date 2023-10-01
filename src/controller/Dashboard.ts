@@ -4,6 +4,18 @@ import { format } from "date-fns";
 import { pt } from "date-fns/locale";
 import { Token } from "./Token";
 
+interface IAcc {
+  [key: string]: {
+    month: string;
+    total: number;
+
+    _id: {
+      month: number;
+      year: number;
+    };
+  };
+}
+
 export class Dashboard {
   async mostSoldProducts(req: Request, res: Response) {
     const token = new Token();
@@ -35,7 +47,12 @@ export class Dashboard {
         },
       });
 
-      return res.status(200).json(products);
+      const productsName = products.map((product) => ({
+        ...product,
+        _id: product.productName,
+      }));
+
+      return res.status(200).json(productsName);
     } catch (error) {
       console.log(error);
       res.status(500).json({ error: "Internal server error" });
@@ -68,13 +85,7 @@ export class Dashboard {
         return res.status(400).json({ error: "No products found" });
       }
 
-      const totalByMonthYear: {
-        [key: string]: {
-          year: number;
-          month: number;
-          total: number;
-        };
-      } = products.reduce((acc, product) => {
+      const totalByMonthYear = products.reduce((acc: IAcc, product) => {
         const createdAt = product.createdAt as Date;
         const year = createdAt.getFullYear();
         const month = format(
